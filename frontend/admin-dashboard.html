@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="css/admindashcss.css" />
+    <style>
+      .topbar {
+        position: fixed;
+        top: 0;
+        left: 230px;
+        right: 0;
+        height: 60px;
+        background-color: #004d4d;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        z-index: 100;
+      }
+
+      .topbar h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+
+      .logout-btn {
+        background-color: crimson;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 5px;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .main-content {
+        margin-top: 60px; /* below the topbar */
+        padding: 20px;
+        margin-left: 230px; /* account for sidebar width */
+      }
+
+      #toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 200;
+      }
+      #toast.show {
+        opacity: 1;
+      }
+
+      /* Orders styling */
+      .order {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 6px;
+        background: #fafafa;
+      }
+      .order h3 {
+        margin-top: 0;
+      }
+      .order ul {
+        list-style-type: disc;
+        margin-left: 20px;
+      }
+      .order .info {
+        margin-top: 10px;
+        font-style: italic;
+      }
+
+      /* Image in product list */
+      table img {
+        max-width: 80px;
+        max-height: 60px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      table th,
+      table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+      }
+      table th {
+        background-color: #eee;
+      }
+      button {
+        padding: 5px 10px;
+        margin: 0 2px;
+        cursor: pointer;
+      }
+      .btn-edit {
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 3px;
+      }
+      .btn-delete {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        border-radius: 3px;
+      }
+
+      /* Edit Modal */
+      #editModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 150;
+      }
+      #editModalContent {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+        position: relative;
+      }
+      .closeBtn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: transparent;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+      }
+      #editProductForm input,
+      #editProductForm textarea,
+      #addProductForm input,
+      #addProductForm textarea {
+        width: 100%;
+        margin-bottom: 12px;
+        padding: 8px;
+        box-sizing: border-box;
+      }
+
+      /* Sidebar */
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 230px;
+        height: 100vh;
+        background-color: #003333;
+        color: white;
+        padding: 20px;
+        box-sizing: border-box;
+        overflow-y: auto;
+      }
+
+      .sidebar h2 {
+        margin-top: 0;
+        margin-bottom: 20px;
+        font-size: 24px;
+      }
+
+      .sidebar a {
+        display: block;
+        color: white;
+        text-decoration: none;
+        margin-bottom: 10px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+
+      .sidebar a:hover {
+        text-decoration: underline;
+      }
+
+      /* Notifications Section */
+      #requestsSection {
+        margin-top: 40px;
+      }
+
+      #requestsSection h2 {
+        margin-bottom: 15px;
+      }
+
+      .request-card {
+        border: 1px solid #ccc;
+        padding: 12px;
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+      }
+
+      .request-card p {
+        margin: 4px 0;
+      }
+
+      .request-card input[type="text"] {
+        width: 70%;
+        padding: 6px;
+        margin-right: 10px;
+        box-sizing: border-box;
+      }
+
+      .request-card button {
+        padding: 6px 10px;
+        background-color: #007bff;
+        border: none;
+        color: white;
+        border-radius: 3px;
+        cursor: pointer;
+      }
+
+      .request-card button:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>Admin Panel</h2>
+      <a href="#" onclick="loadDashboard(); return false;">📊 Dashboard</a>
+      <a href="#" onclick="loadProductList(); return false;">📋 Product List</a>
+      <a href="#" onclick="loadAddProduct(); return false;">➕ Add Product</a>
+      <a href="#" onclick="loadOrder(); return false;">🛒 Users Order</a>
+    </div>
+
+    <div class="topbar">
+      <h1>Welcome Admin</h1>
+      <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <div class="main-content" id="mainContent"></div>
+
+    <div id="toast"></div>
+
+    <!-- Edit Modal -->
+    <div id="editModal">
+      <div id="editModalContent">
+        <button class="closeBtn" id="closeEditModal">&times;</button>
+        <h2>Edit Product</h2>
+        <form id="editProductForm" enctype="multipart/form-data">
+          <input
+            type="text"
+            id="editName"
+            required
+            placeholder="Product Name"
+          />
+          <textarea
+            id="editDescription"
+            required
+            placeholder="Description"
+          ></textarea>
+          <input
+            type="number"
+            id="editPrice"
+            required
+            step="0.01"
+            placeholder="Price"
+          />
+          <input type="file" id="editImage" accept="image/*" />
+          <button type="submit">Save Changes</button>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      const mainContent = document.getElementById("mainContent");
+      const toast = document.getElementById("toast");
+
+      function showToast(message, type = "success") {
+        toast.textContent = message;
+        toast.className = "";
+        toast.classList.add("show", type);
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      // SESSION CHECK
+      function checkSession() {
+        const token = localStorage.getItem("adminToken");
+        if (!token) {
+          window.location.href = "admin-login.html";
+        }
+      }
+
+      // LOGOUT FUNCTION
+      function logout() {
+        localStorage.removeItem("adminToken");
+        window.location.href = "admin-login.html";
+      }
+
+      // DASHBOARD - now includes notification requests
+      function loadDashboard() {
+        checkSession();
+
+        mainContent.innerHTML = `
+          <h1>Welcome to the Admin Dashboard</h1>
+          <div class="card-container">
+            <div class="card">
+              <h3 id="productCount" class="loading">Loading...</h3>
+              <p>Total Products</p>
+            </div>
+            <div class="card">
+              <h3 id="userCount" class="loading">Loading...</h3>
+              <p>Total Users</p>
+            </div>
+          </div>
+
+          <section id="requestsSection">
+            <h2>User Requests for Product Availability</h2>
+            <div id="requestsContainer">Loading requests...</div>
+          </section>
+        `;
+
+        // Load total products
+        fetch("http://localhost:2020/api/products/get-product")
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("productCount").textContent = data.length;
+          })
+          .catch(() => {
+            document.getElementById("productCount").textContent = "Error";
+          });
+
+        // Load total users
+        fetch("http://localhost:2020/api/users/get-user")
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("userCount").textContent = data.length;
+          })
+          .catch(() => {
+            document.getElementById("userCount").textContent = "Error";
+          });
+
+        // Load product availability requests
+        loadRequests();
+      }
+
+      // Load and render requests
+      function loadRequests() {
+        const container = document.getElementById("requestsContainer");
+        fetch("http://localhost:2020/api/requests")
+          .then((res) => res.json())
+          .then((requests) => {
+            if (!requests.length) {
+              container.innerHTML = "<p>No pending requests.</p>";
+              return;
+            }
+
+            container.innerHTML = "";
+            requests.forEach((req) => {
+              const reqDiv = document.createElement("div");
+              reqDiv.className = "request-card";
+
+              reqDiv.innerHTML = `
+                <p><strong>User:</strong> ${
+                  req.userId?.username || "Unknown"
+                }</p>
+                <p><strong>Product:</strong> ${
+                  req.productId?.name || "Unknown"
+                }</p>
+                <p><strong>Status:</strong> ${req.status}</p>
+                <p><strong>Message:</strong> ${req.message || "N/A"}</p>
+                ${
+                  req.status === "pending"
+                    ? `
+                    <input type="text" id="response-${req._id}" placeholder="Enter your response" />
+                    <button onclick="respondToRequest('${req._id}')">Respond</button>
+                  `
+                    : `<p><strong>Response:</strong> ${req.response}</p>`
+                }
+              `;
+
+              container.appendChild(reqDiv);
+            });
+          })
+          .catch((err) => {
+            container.innerHTML = `<p style="color:red;">Failed to load requests: ${err.message}</p>`;
+          });
+      }
+
+      // Respond to a request
+      function respondToRequest(requestId) {
+        const input = document.getElementById("response-" + requestId);
+        if (!input || !input.value.trim()) {
+          alert("Please enter a response message.");
+          return;
+        }
+
+        fetch(`http://localhost:2020/api/requests/${requestId}/respond`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ response: input.value.trim() }),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              return res.json().then((data) => {
+                throw new Error(data.message || "Failed to send response");
+              });
+            }
+            return res.json();
+          })
+          .then(() => {
+            showToast("Response sent successfully!");
+            loadDashboard(); // reload dashboard to refresh requests
+          })
+          .catch((err) => {
+            alert("Error sending response: " + err.message);
+          });
+      }
+
+      // ADD PRODUCT
+      function loadAddProduct() {
+        checkSession();
+
+        mainContent.innerHTML = `
+          <div class="container">
+            <h2>Add New Product</h2>
+            <form id="addProductForm" enctype="multipart/form-data">
+              <input type="text" id="name" name="name" placeholder="Product Name" required />
+              <textarea id="description" name="description" placeholder="Product Description" required></textarea>
+              <input type="number" id="price" name="price" placeholder="Price (Birr)" required step="0.01" />
+              <input type="file" id="image" name="image" accept="image/*" required />
+              <button type="submit">Add Product</button>
+            </form>
+          </div>
+        `;
+
+        document.getElementById("addProductForm").onsubmit = async (e) => {
+          e.preventDefault();
+
+          const formData = new FormData();
+          formData.append("name", document.getElementById("name").value.trim());
+          formData.append(
+            "description",
+            document.getElementById("description").value.trim()
+          );
+          formData.append("price", document.getElementById("price").value);
+          formData.append("image", document.getElementById("image").files[0]);
+
+          try {
+            await fetch("http://localhost:2020/api/products/add-product", {
+              method: "POST",
+              body: formData,
+            }).then(handleResponse);
+
+            showToast("Product added successfully!", "success");
+            setTimeout(loadDashboard, 1000);
+          } catch (err) {
+            showToast("Failed to add product: " + err.message, "error");
+          }
+        };
+      }
+
+      // PRODUCT LIST
+      let currentEditProductId = null;
+      let allProducts = [];
+
+      function loadProductList() {
+        checkSession();
+
+        mainContent.innerHTML = `
+          <div class="header"><h1>Product List</h1></div>
+          <input type="text" id="searchInput" placeholder="Search products by name..." />
+          <div id="productList">Loading products...</div>
+        `;
+
+        document
+          .getElementById("searchInput")
+          .addEventListener("input", (e) => {
+            displayProducts(e.target.value.toLowerCase());
+          });
+
+        loadProducts();
+      }
+
+      const handleResponse = async (res) => {
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await res.json()
+          : await res.text();
+        if (!res.ok)
+          throw new Error(typeof data === "object" ? data.message : data);
+        return data;
+      };
+
+      function loadProducts() {
+        const productList = document.getElementById("productList");
+
+        fetch("http://localhost:2020/api/products/get-product")
+          .then(handleResponse)
+          .then((products) => {
+            allProducts = products;
+            if (!products.length) {
+              productList.innerHTML = "<p>No products available.</p>";
+              return;
+            }
+            displayProducts("");
+          })
+          .catch((err) => {
+            productList.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`;
+          });
+      }
+
+      function displayProducts(filterText) {
+        const productList = document.getElementById("productList");
+        const filtered = allProducts.filter((p) =>
+          p.name.toLowerCase().includes(filterText)
+        );
+
+        if (!filtered.length) {
+          productList.innerHTML = "<p>No matching products found.</p>";
+          return;
+        }
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr><th>Image</th><th>Name</th><th>Description</th><th>Price</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            ${filtered
+              .map(
+                (p) => `
+                <tr>
+                  <td><img src="http://localhost:2020/${p.image}" alt="${p.name}" /></td>
+                  <td>${p.name}</td>
+                  <td>${p.description}</td>
+                  <td>${p.price} Birr</td>
+                  <td>
+                    <button class="btn btn-edit" data-id="${p._id}">Edit</button>
+                    <button class="btn btn-delete" data-id="${p._id}">Delete</button>
+                  </td>
+                </tr>
+              `
+              )
+              .join("")}
+          </tbody>
+        `;
+
+        productList.innerHTML = "";
+        productList.appendChild(table);
+
+        document.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.onclick = () => openEditModal(btn.dataset.id);
+        });
+
+        document.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.onclick = () => {
+            if (confirm("Are you sure?")) deleteProduct(btn.dataset.id);
+          };
+        });
+      }
+
+      const editModal = document.getElementById("editModal");
+      const closeEditModalBtn = document.getElementById("closeEditModal");
+      const editProductForm = document.getElementById("editProductForm");
+
+      function openEditModal(id) {
+        fetch(`http://localhost:2020/api/products/get-product/${id}`)
+          .then(handleResponse)
+          .then((p) => {
+            currentEditProductId = id;
+            document.getElementById("editName").value = p.name;
+            document.getElementById("editDescription").value = p.description;
+            document.getElementById("editPrice").value = p.price;
+            editModal.style.display = "flex";
+          })
+          .catch((err) => alert("Failed to load product: " + err.message));
+      }
+
+      closeEditModalBtn.onclick = () => {
+        editModal.style.display = "none";
+        currentEditProductId = null;
+        editProductForm.reset();
+      };
+
+      window.onclick = (e) => {
+        if (e.target === editModal) {
+          editModal.style.display = "none";
+          currentEditProductId = null;
+          editProductForm.reset();
+        }
+      };
+
+      editProductForm.onsubmit = (e) => {
+        e.preventDefault();
+        if (!currentEditProductId) return alert("No product selected.");
+
+        const formData = new FormData();
+        formData.append("name", document.getElementById("editName").value);
+        formData.append(
+          "description",
+          document.getElementById("editDescription").value
+        );
+        formData.append("price", document.getElementById("editPrice").value);
+        const imageFile = document.getElementById("editImage").files[0];
+        if (imageFile) formData.append("image", imageFile);
+
+        fetch(
+          `http://localhost:2020/api/products/edit-product/${currentEditProductId}`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        )
+          .then(handleResponse)
+          .then(() => {
+            showToast("Product updated!");
+            editModal.style.display = "none";
+            currentEditProductId = null;
+            loadProducts();
+          })
+          .catch((err) => alert("Update failed: " + err.message));
+      };
+
+      function deleteProduct(id) {
+        fetch(`http://localhost:2020/api/products/delete-product/${id}`, {
+          method: "DELETE",
+        })
+          .then(handleResponse)
+          .then(() => {
+            showToast("Product deleted!");
+            loadProducts();
+          })
+          .catch((err) => alert("Delete failed: " + err.message));
+      }
+
+      // ——————— USERS ORDER ———————
+      function loadOrder() {
+        checkSession();
+
+        mainContent.innerHTML =
+          "<h1>Users Orders</h1><div id='ordersContainer'>Loading orders...</div>";
+        const ordersContainer = document.getElementById("ordersContainer");
+
+        fetch("http://localhost:2020/api/orders/all") // or your actual orders endpoint
+          .then((res) => res.json())
+          .then((orders) => {
+            if (!orders.length) {
+              ordersContainer.innerHTML = "<p>No orders found.</p>";
+              return;
+            }
+
+            ordersContainer.innerHTML = "";
+
+            orders.forEach((order) => {
+              const totalPrice = order.items.reduce(
+                (sum, item) => sum + item.price * item.quantity,
+                0
+              );
+
+              const orderDiv = document.createElement("div");
+              orderDiv.className = "order";
+              orderDiv.style.border = "1px solid #ccc";
+              orderDiv.style.margin = "10px 0";
+              orderDiv.style.padding = "10px";
+
+              orderDiv.innerHTML = `
+                <h3>Order ID: ${order._id}</h3>
+                <p><strong>Delivery To:</strong> ${
+                  order.deliveryInfo?.fullName || "N/A"
+                }</p>
+                <p><strong>Phone:</strong> ${
+                  order.deliveryInfo?.phone || "N/A"
+                }</p>
+                <p><strong>Address:</strong> ${
+                  order.deliveryInfo?.address || "N/A"
+                }</p>
+                <p><strong>Order Date:</strong> ${new Date(
+                  order.createdAt
+                ).toLocaleString()}</p>
+                <h4>Items:</h4>
+                <ul>
+                  ${
+                    Array.isArray(order.items) && order.items.length > 0
+                      ? order.items
+                          .map(
+                            (item) =>
+                              `<li>${item.name} (Qty: ${item.quantity}) - ${item.price} Birr each</li>`
+                          )
+                          .join("")
+                      : "<li>No items found in this order.</li>"
+                  }
+                </ul>
+                <p><strong>Total Price:</strong> ${totalPrice} Birr</p>
+              `;
+
+              ordersContainer.appendChild(orderDiv);
+            });
+          })
+          .catch((err) => {
+            ordersContainer.innerHTML = `<p style="color:red;">Error loading orders: ${err.message}</p>`;
+          });
+      }
+
+      // INITIAL PAGE LOAD
+      window.onload = () => {
+        checkSession();
+        loadDashboard();
+      };
+    </script>
+  </body>
+</html>

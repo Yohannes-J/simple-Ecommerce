@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Shopping Cart</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+        background: #f2f2f2;
+      }
+
+      h1,
+      h2 {
+        color: #333;
+      }
+
+      ul#cart-items {
+        list-style: none;
+        padding: 0;
+      }
+
+      li {
+        background: #fff;
+        padding: 10px;
+        margin-bottom: 8px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+
+      label {
+        display: block;
+        margin-top: 10px;
+        font-weight: bold;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 8px;
+        margin-top: 4px;
+        margin-bottom: 12px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      button {
+        padding: 10px 16px;
+        background: teal;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: darkcyan;
+      }
+
+      button:disabled {
+        background: gray;
+        cursor: not-allowed;
+      }
+
+      .section {
+        background: #fff;
+        padding: 20px;
+        margin-top: 30px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Redirect protection -->
+    <script>
+      const userId = localStorage.getItem("userId");
+      if (!userId) {
+        alert("Please log in first.");
+        window.location.href = "login.html";
+      }
+    </script>
+
+    <h1>Your Cart</h1>
+    <ul id="cart-items"></ul>
+
+    <!-- Delivery Info -->
+    <div class="section" id="deliverySection">
+      <h2>Delivery Information</h2>
+      <label for="fullName">Full Name</label>
+      <input type="text" id="fullName" placeholder="Your full name" required />
+
+      <label for="phone">Phone Number</label>
+      <input type="text" id="phone" placeholder="+251-900000000" required />
+
+      <label for="address">Delivery Address</label>
+      <textarea
+        id="address"
+        rows="3"
+        placeholder="Address to deliver products"
+        required
+      ></textarea>
+
+      <button id="checkoutBtn" onclick="checkout()">Checkout</button>
+    </div>
+
+    <script>
+      const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
+      const cartList = document.getElementById("cart-items");
+      const checkoutBtn = document.getElementById("checkoutBtn");
+
+      function renderCart() {
+        cartList.innerHTML = "";
+
+        if (cartItems.length === 0) {
+          cartList.innerHTML = "<li>Your cart is empty.</li>";
+          checkoutBtn.disabled = true;
+          return;
+        }
+
+        checkoutBtn.disabled = false;
+
+        cartItems.forEach((item) => {
+          const li = document.createElement("li");
+          const qty = item.quantity ?? 1;
+          li.textContent = `${item.name} - ${item.price.toFixed(
+            2
+          )} Birr × ${qty}`;
+          cartList.appendChild(li);
+        });
+      }
+
+      renderCart();
+
+      function checkout() {
+        const fullName = document.getElementById("fullName").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const address = document.getElementById("address").value.trim();
+
+        if (!fullName || !phone || !address) {
+          return alert("Please fill out delivery information.");
+        }
+
+        if (cartItems.length === 0) {
+          return alert("Your cart is empty.");
+        }
+
+        const orderData = {
+          userId: localStorage.getItem("userId"),
+          items: cartItems,
+          deliveryInfo: { fullName, phone, address },
+        };
+
+        fetch("http://localhost:2020/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(orderData),
+        })
+          .then((res) => {
+            if (!res.ok) {
+              return res.json().then((data) => {
+                throw new Error(data.message || "Failed to place order");
+              });
+            }
+            return res.json();
+          })
+          .then(() => {
+            alert("Order placed successfully!");
+            localStorage.removeItem("cart");
+            window.location.href = "order.html";
+          })
+          .catch((err) => {
+            alert("Checkout error: " + err.message);
+          });
+      }
+    </script>
+  </body>
+</html>

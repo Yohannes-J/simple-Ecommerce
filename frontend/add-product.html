@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Add Product</title>
+    <style>
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background-color: #eef5f5;
+        padding: 40px;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      h2 {
+        text-align: center;
+        color: teal;
+        margin-bottom: 20px;
+      }
+
+      input,
+      textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 14px;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: teal;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 15px;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: darkcyan;
+      }
+
+      /* Toast styles */
+      #toast {
+        visibility: hidden;
+        min-width: 250px;
+        margin-left: -125px;
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        border-radius: 5px;
+        padding: 16px;
+        position: fixed;
+        z-index: 1000;
+        left: 50%;
+        bottom: 30px;
+        font-size: 17px;
+        opacity: 0;
+        transition: opacity 0.5s, visibility 0.5s;
+      }
+
+      #toast.show {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      #toast.success {
+        background-color: #4caf50; /* green */
+      }
+
+      #toast.error {
+        background-color: #f44336; /* red */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>Add New Product</h2>
+      <form id="addProductForm" enctype="multipart/form-data">
+        <input
+          type="text"
+          id="name"
+          name="name"
+          placeholder="Product Name"
+          required
+        />
+        <textarea
+          id="description"
+          name="description"
+          placeholder="Product Description"
+          required
+        ></textarea>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          placeholder="Price (Birr)"
+          required
+          step="0.01"
+        />
+        <input type="file" id="image" name="image" accept="image/*" required />
+        <button type="submit">Add Product</button>
+      </form>
+    </div>
+
+    <div id="toast"></div>
+
+    <script>
+      const addProductForm = document.getElementById("addProductForm");
+      const toast = document.getElementById("toast");
+
+      function showToast(message, type = "success") {
+        toast.textContent = message;
+        toast.className = ""; // reset classes
+        toast.classList.add("show", type);
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      async function handleResponse(res) {
+        const contentType = res.headers.get("content-type") || "";
+        let data;
+        if (contentType.includes("application/json")) {
+          data = await res.json();
+        } else {
+          data = await res.text();
+        }
+        if (!res.ok) {
+          const errorMessage =
+            typeof data === "object"
+              ? data.message || JSON.stringify(data)
+              : data;
+          throw new Error(errorMessage || "Unknown error occurred");
+        }
+        return data;
+      }
+
+      addProductForm.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("name", document.getElementById("name").value.trim());
+        formData.append(
+          "description",
+          document.getElementById("description").value.trim()
+        );
+        formData.append("price", document.getElementById("price").value);
+        formData.append("image", document.getElementById("image").files[0]);
+
+        try {
+          await fetch("http://localhost:2020/api/products/add-product", {
+            method: "POST",
+            body: formData,
+          }).then(handleResponse);
+
+          showToast("Product added successfully!", "success");
+
+          // Redirect to dashboard after showing toast
+          setTimeout(() => {
+            window.location.href = "admin-dashboard.html"; // Change to your dashboard page URL
+          }, 1500);
+        } catch (err) {
+          showToast("Failed to add product: " + err.message, "error");
+        }
+      };
+    </script>
+  </body>
+</html>

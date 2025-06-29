@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Admin Login</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f6f6;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+
+      .login-box {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        width: 320px;
+        text-align: center;
+      }
+
+      h2 {
+        color: teal;
+        margin-bottom: 20px;
+      }
+
+      input {
+        width: 100%;
+        padding: 10px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      button {
+        width: 100%;
+        padding: 10px;
+        background-color: teal;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 10px;
+        font-size: 16px;
+      }
+
+      button:hover {
+        background-color: darkcyan;
+      }
+
+      .message {
+        margin-top: 15px;
+        font-weight: bold;
+      }
+
+      .error {
+        color: red;
+      }
+
+      .success {
+        color: green;
+      }
+
+      /* Link style */
+      .switch-login {
+        margin-top: 15px;
+        display: block;
+        color: teal;
+        cursor: pointer;
+        text-decoration: underline;
+        font-size: 14px;
+      }
+      .switch-login:hover {
+        color: darkcyan;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="login-box">
+      <h2>Admin Login</h2>
+      <input type="email" id="email" placeholder="Admin Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button onclick="login()">Login</button>
+      <div id="message" class="message"></div>
+      <!-- Switch to user login link -->
+      <a href="login.html" class="switch-login">Switch to User Login</a>
+    </div>
+
+    <script>
+      async function login() {
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+        const messageDiv = document.getElementById("message");
+
+        if (!email || !password) {
+          messageDiv.textContent = "Please enter both email and password.";
+          messageDiv.className = "message error";
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            "http://localhost:2020/api/admin/login",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({ email, password }),
+            }
+          );
+
+          const contentType = response.headers.get("content-type");
+
+          if (contentType && contentType.includes("application/json")) {
+            const data = await response.json();
+
+            if (data.success && data.token) {
+              localStorage.setItem("adminToken", data.token);
+              messageDiv.textContent = "Login successful! Redirecting...";
+              messageDiv.className = "message success";
+
+              setTimeout(() => {
+                window.location.href = "admin-dashboard.html";
+              }, 1000);
+            } else {
+              messageDiv.textContent = data.message || "Login failed.";
+              messageDiv.className = "message error";
+            }
+          } else {
+            const html = await response.text();
+            console.error("Expected JSON, but received HTML:", html);
+            messageDiv.textContent =
+              "Server error: unexpected response format.";
+            messageDiv.className = "message error";
+          }
+        } catch (err) {
+          console.error("Network or server error:", err);
+          messageDiv.textContent = "An error occurred. Please try again.";
+          messageDiv.className = "message error";
+        }
+      }
+    </script>
+  </body>
+</html>

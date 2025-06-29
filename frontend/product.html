@@ -1,0 +1,290 @@
+<!-- product.html -->
+<div class="header">
+  <h1>Product List</h1>
+  <a href="add-product.html" class="add-btn">➕ Add Product</a>
+</div>
+
+<div id="productList">Loading products...</div>
+
+<!-- Edit Modal -->
+<div id="editModal">
+  <div id="editModalContent">
+    <button class="closeBtn" id="closeEditModal">&times;</button>
+    <h2>Edit Product</h2>
+    <form id="editProductForm" enctype="multipart/form-data">
+      <input type="text" id="editName" required placeholder="Product Name" />
+      <textarea
+        id="editDescription"
+        required
+        placeholder="Description"
+      ></textarea>
+      <input
+        type="number"
+        id="editPrice"
+        required
+        step="0.01"
+        placeholder="Price"
+      />
+      <input type="file" id="editImage" accept="image/*" />
+      <button type="submit">Save Changes</button>
+    </form>
+  </div>
+</div>
+
+<style>
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+  }
+
+  .add-btn {
+    padding: 10px 16px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .add-btn:hover {
+    background: #218838;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  th,
+  td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  th {
+    background-color: #003366;
+    color: white;
+  }
+
+  td img {
+    max-height: 60px;
+    border-radius: 6px;
+  }
+
+  .btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    color: white;
+    cursor: pointer;
+    margin-right: 5px;
+  }
+
+  .btn-edit {
+    background-color: #007bff;
+  }
+
+  .btn-edit:hover {
+    background-color: #0056b3;
+  }
+
+  .btn-delete {
+    background-color: #dc3545;
+  }
+
+  .btn-delete:hover {
+    background-color: #a3001f;
+  }
+
+  #editModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  #editModalContent {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    position: relative;
+  }
+
+  .closeBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: crimson;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  const productList = document.getElementById("productList");
+  const editModal = document.getElementById("editModal");
+  const closeEditModalBtn = document.getElementById("closeEditModal");
+  const editProductForm = document.getElementById("editProductForm");
+  let currentEditProductId = null;
+
+  async function handleResponse(res) {
+    const contentType = res.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+      ? await res.json()
+      : await res.text();
+    if (!res.ok)
+      throw new Error(typeof data === "object" ? data.message : data);
+    return data;
+  }
+
+  function loadProducts() {
+    fetch("http://localhost:2020/api/products/get-product")
+      .then(handleResponse)
+      .then((products) => {
+        if (!products.length) {
+          productList.innerHTML = "<p>No products available.</p>";
+          return;
+        }
+
+        const table = document.createElement("table");
+        table.innerHTML = `
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${products
+              .map(
+                (p) => `
+              <tr>
+                <td><img src="http://localhost:2020/${p.image}" alt="${p.name}" /></td>
+                <td>${p.name}</td>
+                <td>${p.description}</td>
+                <td>${p.price} Birr</td>
+                <td>
+                  <button class="btn btn-edit" data-id="${p._id}">Edit</button>
+                  <button class="btn btn-delete" data-id="${p._id}">Delete</button>
+                </td>
+              </tr>
+            `
+              )
+              .join("")}
+          </tbody>
+        `;
+        productList.innerHTML = "";
+        productList.appendChild(table);
+
+        document.querySelectorAll(".btn-edit").forEach((btn) => {
+          btn.onclick = () => openEditModal(btn.dataset.id);
+        });
+
+        document.querySelectorAll(".btn-delete").forEach((btn) => {
+          btn.onclick = () => {
+            if (confirm("Are you sure?")) deleteProduct(btn.dataset.id);
+          };
+        });
+      })
+      .catch(
+        (err) =>
+          (productList.innerHTML = `<p style="color:red;">Error: ${err.message}</p>`)
+      );
+  }
+
+  function openEditModal(id) {
+    fetch(`http://localhost:2020/api/products/get-product/${id}`)
+      .then(handleResponse)
+      .then((p) => {
+        currentEditProductId = id;
+        document.getElementById("editName").value = p.name;
+        document.getElementById("editDescription").value = p.description;
+        document.getElementById("editPrice").value = p.price;
+        editModal.style.display = "flex";
+      })
+      .catch((err) => alert("Failed to load product: " + err.message));
+  }
+
+  closeEditModalBtn.onclick = () => {
+    editModal.style.display = "none";
+    currentEditProductId = null;
+    editProductForm.reset();
+  };
+
+  window.onclick = (e) => {
+    if (e.target === editModal) {
+      editModal.style.display = "none";
+      currentEditProductId = null;
+      editProductForm.reset();
+    }
+  };
+
+  editProductForm.onsubmit = (e) => {
+    e.preventDefault();
+    if (!currentEditProductId) return alert("No product selected.");
+
+    const formData = new FormData();
+    formData.append("name", document.getElementById("editName").value);
+    formData.append(
+      "description",
+      document.getElementById("editDescription").value
+    );
+    formData.append("price", document.getElementById("editPrice").value);
+
+    const imageFile = document.getElementById("editImage").files[0];
+    if (imageFile) formData.append("image", imageFile);
+
+    fetch(
+      `http://localhost:2020/api/products/edit-product/${currentEditProductId}`,
+      {
+        method: "PUT",
+        body: formData,
+      }
+    )
+      .then(handleResponse)
+      .then(() => {
+        alert("Product updated!");
+        editModal.style.display = "none";
+        currentEditProductId = null;
+        loadProducts();
+      })
+      .catch((err) => alert("Update failed: " + err.message));
+  };
+
+  function deleteProduct(id) {
+    fetch(`http://localhost:2020/api/products/delete-product/${id}`, {
+      method: "DELETE",
+    })
+      .then(handleResponse)
+      .then(() => {
+        alert("Product deleted!");
+        loadProducts();
+      })
+      .catch((err) => alert("Delete failed: " + err.message));
+  }
+
+  // Initial load
+  loadProducts();
+</script>

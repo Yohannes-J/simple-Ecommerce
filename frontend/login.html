@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Login / Register</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 40px;
+        max-width: 400px;
+        margin: auto;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        text-align: center;
+      }
+      h2 {
+        text-align: center;
+      }
+      input {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+      button {
+        width: 100%;
+        padding: 10px;
+        background: teal;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-top: 10px;
+      }
+      button:hover {
+        background: darkcyan;
+      }
+      #toggleBtn {
+        background: transparent;
+        color: teal;
+        width: auto;
+        padding: 5px 10px;
+        border: 2px solid teal;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 10px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      #toggleBtn:hover {
+        background: teal;
+        color: white;
+      }
+      #switchAdminBtn {
+        background: transparent;
+        color: teal;
+        width: auto;
+        padding: 5px 10px;
+        border: 2px solid teal;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 10px auto 20px auto;
+        display: block;
+      }
+      #switchAdminBtn:hover {
+        background: teal;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="toggleBtn">Switch to Register</button>
+    <button id="switchAdminBtn">Switch to Admin Login</button>
+    <h2 id="formTitle">Signin User</h2>
+    <input
+      id="fullName"
+      placeholder="Full Name (for register only)"
+      style="display: none"
+    />
+    <input id="email" placeholder="Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="handleSubmit()">Continue</button>
+
+    <script>
+      let isLoginMode = true; // start in login mode
+
+      const toggleBtn = document.getElementById("toggleBtn");
+      const switchAdminBtn = document.getElementById("switchAdminBtn");
+      const formTitle = document.getElementById("formTitle");
+      const nameInput = document.getElementById("fullName");
+
+      toggleBtn.onclick = () => {
+        isLoginMode = !isLoginMode;
+        updateForm();
+      };
+
+      switchAdminBtn.onclick = () => {
+        // Redirect to admin login page
+        window.location.href = "admin-login.html";
+      };
+
+      function updateForm() {
+        if (isLoginMode) {
+          formTitle.innerText = "Login";
+          nameInput.style.display = "none";
+          toggleBtn.innerText = "Switch to Register";
+        } else {
+          formTitle.innerText = "Register";
+          nameInput.style.display = "block";
+          toggleBtn.innerText = "Switch to Login";
+        }
+      }
+
+      async function handleSubmit() {
+        const name = nameInput.value.trim();
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!email || !password) {
+          alert("Email and password are required.");
+          return;
+        }
+
+        try {
+          if (isLoginMode) {
+            // LOGIN
+            const loginRes = await fetch(
+              "http://localhost:2020/api/users/login",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, password }),
+              }
+            );
+
+            const loginData = await loginRes.json();
+
+            if (loginData.user && loginData.user._id) {
+              localStorage.setItem("userId", loginData.user._id);
+              alert("Login successful!");
+              window.location.href = "Home.html";
+            } else {
+              alert("Incorrect email or password.");
+            }
+          } else {
+            // REGISTER
+            if (!name) {
+              alert("Please enter your full name to register.");
+              return;
+            }
+
+            const regRes = await fetch(
+              "http://localhost:2020/api/users/register",
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ name, email, password }),
+              }
+            );
+
+            const regData = await regRes.json();
+
+            if (regData.user && regData.user._id) {
+              localStorage.setItem("userId", regData.user._id);
+              alert("Registration successful! You are now logged in.");
+              window.location.href = "Home.html";
+            } else {
+              alert("Registration failed.");
+            }
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Something went wrong.");
+        }
+      }
+
+      updateForm();
+    </script>
+  </body>
+</html>
