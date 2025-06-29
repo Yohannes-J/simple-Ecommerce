@@ -7,3 +7,8 @@
 
 
 ![alt text](https://github.com/Yohannes-J/simple-Ecommerce/raw/main/prolist.png)
+![alt text](https://github.com/Yohannes-J/simple-Ecommerce/raw/main/listpro.png)
+![alt text](https://github.com/Yohannes-J/simple-Ecommerce/raw/main/home.png)
+![alt text](https://github.com/Yohannes-J/simple-Ecommerce/raw/main/crt.png)
+
+
