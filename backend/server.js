@@ -30,5 +30,9 @@ app.use("/api/orders", orderRouter);
 
 app.use("/api/requests", reqRouter);
 
+app.get("/", (req, res) => {
+  res.send("✅ Online backend server is working.");
+});
+
 const PORT = process.env.PORT || 2020;
 app.listen(PORT, () => console.log(`backend running on port ${PORT}`));
