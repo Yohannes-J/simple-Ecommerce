@@ -50,7 +50,7 @@
         const message = prompt("Leave a note for the admin (optional):");
 
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/requests",
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/requests",
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -76,7 +76,7 @@
       }
 
       fetch(
-        `https://simple-ecommerce-backend-6nvi.onrender.com//api/orders/user/${userId}`
+        `https://simple-ecommerce-backend-6nvi.onrender.com/api/orders/user/${userId}`
       )
         .then((res) => {
           console.log("Response status:", res.status);

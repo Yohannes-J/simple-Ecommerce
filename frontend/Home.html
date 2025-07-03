@@ -320,7 +320,7 @@
           div.className = "product";
 
           const imageUrl = p.image
-            ? `https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}`
+            ? `https://simple-ecommerce-backend-6nvi.onrender.com/${p.image}`
             : "https://via.placeholder.com/220x140";
 
           const cartItem = cart.find((item) => item._id === p._id);
@@ -424,7 +424,7 @@
 
       function loadProducts() {
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/products/get-product"
         )
           .then((res) => res.json())
           .then((products) => {

@@ -328,7 +328,7 @@
 
         // Load total products
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/products/get-product"
         )
           .then((res) => res.json())
           .then((data) => {
@@ -340,7 +340,7 @@
 
         // Load total users
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/users/get-user"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/users/get-user"
         )
           .then((res) => res.json())
           .then((data) => {
@@ -357,9 +357,7 @@
       // Load and render requests
       function loadRequests() {
         const container = document.getElementById("requestsContainer");
-        fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/requests"
-        )
+        fetch("https://simple-ecommerce-backend-6nvi.onrender.com/api/requests")
           .then((res) => res.json())
           .then((requests) => {
             if (!requests.length) {
@@ -408,7 +406,7 @@
         }
 
         fetch(
-          `https://simple-ecommerce-backend-6nvi.onrender.com//api/requests/${requestId}/respond`,
+          `https://simple-ecommerce-backend-6nvi.onrender.com/api/requests/${requestId}/respond`,
           {
             method: "PUT",
             headers: {
@@ -465,7 +463,7 @@
 
           try {
             await fetch(
-              "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/add-product",
+              "https://simple-ecommerce-backend-6nvi.onrender.com/api/products/add-product",
               {
                 method: "POST",
                 body: formData,
@@ -516,7 +514,7 @@
         const productList = document.getElementById("productList");
 
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/products/get-product"
         )
           .then(handleResponse)
           .then((products) => {
@@ -553,7 +551,7 @@
               .map(
                 (p) => `
                 <tr>
-                  <td><img src="https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}" alt="${p.name}" /></td>
+                  <td><img src="https://simple-ecommerce-backend-6nvi.onrender.com/${p.image}" alt="${p.name}" /></td>
                   <td>${p.name}</td>
                   <td>${p.description}</td>
                   <td>${p.price} Birr</td>
@@ -588,7 +586,7 @@
 
       function openEditModal(id) {
         fetch(
-          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product/${id}`
+          `https://simple-ecommerce-backend-6nvi.onrender.com/api/products/get-product/${id}`
         )
           .then(handleResponse)
           .then((p) => {
@@ -630,7 +628,7 @@
         if (imageFile) formData.append("image", imageFile);
 
         fetch(
-          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/edit-product/${currentEditProductId}`,
+          `https://simple-ecommerce-backend-6nvi.onrender.com/api/products/edit-product/${currentEditProductId}`,
           {
             method: "PUT",
             body: formData,
@@ -648,7 +646,7 @@
 
       function deleteProduct(id) {
         fetch(
-          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/delete-product/${id}`,
+          `https://simple-ecommerce-backend-6nvi.onrender.com/api/products/delete-product/${id}`,
           {
             method: "DELETE",
           }
@@ -670,7 +668,7 @@
         const ordersContainer = document.getElementById("ordersContainer");
 
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/orders/all"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/orders/all"
         ) // or your actual orders endpoint
           .then((res) => res.json())
           .then((orders) => {

@@ -124,7 +124,7 @@
 
       function loadProducts() {
         fetch(
-          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+          "https://simple-ecommerce-backend-6nvi.onrender.com/api/products/get-product"
         )
           .then((res) => res.json())
           .then((products) => {
@@ -139,7 +139,7 @@
               div.className = "product";
 
               const imageUrl = p.image
-                ? `https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}`
+                ? `https://simple-ecommerce-backend-6nvi.onrender.com/${p.image}`
                 : "https://via.placeholder.com/200x150";
 
               div.innerHTML = `
