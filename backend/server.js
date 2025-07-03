@@ -30,6 +30,26 @@ app.use("/api/orders", orderRouter);
 
 app.use("/api/requests", reqRouter);
 
+// ✅ Allowed frontend origins
+const allowedOrigins = [
+  "http://localhost:3000", // for local dev
+  "https://simple-ecommerce-frontend.onrender.com/", // your actual frontend
+];
+
+// ✅ CORS setup to allow requests from allowedOrigins
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.get("/", (req, res) => {
   res.send("✅ Online backend server is working.");
 });
