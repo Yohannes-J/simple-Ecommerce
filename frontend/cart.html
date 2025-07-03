@@ -151,11 +151,14 @@
           deliveryInfo: { fullName, phone, address },
         };
 
-        fetch("http://localhost:2020/api/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(orderData),
-        })
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/orders",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderData),
+          }
+        )
           .then((res) => {
             if (!res.ok) {
               return res.json().then((data) => {

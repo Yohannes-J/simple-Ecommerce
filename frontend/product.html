@@ -157,7 +157,9 @@
   }
 
   function loadProducts() {
-    fetch("http://localhost:2020/api/products/get-product")
+    fetch(
+      "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+    )
       .then(handleResponse)
       .then((products) => {
         if (!products.length) {
@@ -181,7 +183,7 @@
               .map(
                 (p) => `
               <tr>
-                <td><img src="http://localhost:2020/${p.image}" alt="${p.name}" /></td>
+                <td><img src="https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}" alt="${p.name}" /></td>
                 <td>${p.name}</td>
                 <td>${p.description}</td>
                 <td>${p.price} Birr</td>
@@ -215,7 +217,9 @@
   }
 
   function openEditModal(id) {
-    fetch(`http://localhost:2020/api/products/get-product/${id}`)
+    fetch(
+      `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product/${id}`
+    )
       .then(handleResponse)
       .then((p) => {
         currentEditProductId = id;
@@ -257,7 +261,7 @@
     if (imageFile) formData.append("image", imageFile);
 
     fetch(
-      `http://localhost:2020/api/products/edit-product/${currentEditProductId}`,
+      `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/edit-product/${currentEditProductId}`,
       {
         method: "PUT",
         body: formData,
@@ -274,9 +278,12 @@
   };
 
   function deleteProduct(id) {
-    fetch(`http://localhost:2020/api/products/delete-product/${id}`, {
-      method: "DELETE",
-    })
+    fetch(
+      `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/delete-product/${id}`,
+      {
+        method: "DELETE",
+      }
+    )
       .then(handleResponse)
       .then(() => {
         alert("Product deleted!");

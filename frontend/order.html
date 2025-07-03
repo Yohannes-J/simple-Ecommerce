@@ -49,11 +49,14 @@
 
         const message = prompt("Leave a note for the admin (optional):");
 
-        fetch("http://localhost:2020/api/requests", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, productId, message }),
-        })
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/requests",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, productId, message }),
+          }
+        )
           .then((res) => res.json())
           .then((data) => {
             alert("Your request has been sent to the admin.");
@@ -72,7 +75,9 @@
         window.location.href = "login.html";
       }
 
-      fetch(`http://localhost:2020/api/orders/user/${userId}`)
+      fetch(
+        `https://simple-ecommerce-backend-6nvi.onrender.com//api/orders/user/${userId}`
+      )
         .then((res) => {
           console.log("Response status:", res.status);
           return res.json();

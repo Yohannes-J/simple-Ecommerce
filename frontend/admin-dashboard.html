@@ -327,7 +327,9 @@
         `;
 
         // Load total products
-        fetch("http://localhost:2020/api/products/get-product")
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+        )
           .then((res) => res.json())
           .then((data) => {
             document.getElementById("productCount").textContent = data.length;
@@ -337,7 +339,9 @@
           });
 
         // Load total users
-        fetch("http://localhost:2020/api/users/get-user")
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/users/get-user"
+        )
           .then((res) => res.json())
           .then((data) => {
             document.getElementById("userCount").textContent = data.length;
@@ -353,7 +357,9 @@
       // Load and render requests
       function loadRequests() {
         const container = document.getElementById("requestsContainer");
-        fetch("http://localhost:2020/api/requests")
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/requests"
+        )
           .then((res) => res.json())
           .then((requests) => {
             if (!requests.length) {
@@ -401,13 +407,16 @@
           return;
         }
 
-        fetch(`http://localhost:2020/api/requests/${requestId}/respond`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ response: input.value.trim() }),
-        })
+        fetch(
+          `https://simple-ecommerce-backend-6nvi.onrender.com//api/requests/${requestId}/respond`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ response: input.value.trim() }),
+          }
+        )
           .then((res) => {
             if (!res.ok) {
               return res.json().then((data) => {
@@ -455,10 +464,13 @@
           formData.append("image", document.getElementById("image").files[0]);
 
           try {
-            await fetch("http://localhost:2020/api/products/add-product", {
-              method: "POST",
-              body: formData,
-            }).then(handleResponse);
+            await fetch(
+              "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/add-product",
+              {
+                method: "POST",
+                body: formData,
+              }
+            ).then(handleResponse);
 
             showToast("Product added successfully!", "success");
             setTimeout(loadDashboard, 1000);
@@ -503,7 +515,9 @@
       function loadProducts() {
         const productList = document.getElementById("productList");
 
-        fetch("http://localhost:2020/api/products/get-product")
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+        )
           .then(handleResponse)
           .then((products) => {
             allProducts = products;
@@ -539,7 +553,7 @@
               .map(
                 (p) => `
                 <tr>
-                  <td><img src="http://localhost:2020/${p.image}" alt="${p.name}" /></td>
+                  <td><img src="https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}" alt="${p.name}" /></td>
                   <td>${p.name}</td>
                   <td>${p.description}</td>
                   <td>${p.price} Birr</td>
@@ -573,7 +587,9 @@
       const editProductForm = document.getElementById("editProductForm");
 
       function openEditModal(id) {
-        fetch(`http://localhost:2020/api/products/get-product/${id}`)
+        fetch(
+          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product/${id}`
+        )
           .then(handleResponse)
           .then((p) => {
             currentEditProductId = id;
@@ -614,7 +630,7 @@
         if (imageFile) formData.append("image", imageFile);
 
         fetch(
-          `http://localhost:2020/api/products/edit-product/${currentEditProductId}`,
+          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/edit-product/${currentEditProductId}`,
           {
             method: "PUT",
             body: formData,
@@ -631,9 +647,12 @@
       };
 
       function deleteProduct(id) {
-        fetch(`http://localhost:2020/api/products/delete-product/${id}`, {
-          method: "DELETE",
-        })
+        fetch(
+          `https://simple-ecommerce-backend-6nvi.onrender.com//api/products/delete-product/${id}`,
+          {
+            method: "DELETE",
+          }
+        )
           .then(handleResponse)
           .then(() => {
             showToast("Product deleted!");
@@ -650,7 +669,9 @@
           "<h1>Users Orders</h1><div id='ordersContainer'>Loading orders...</div>";
         const ordersContainer = document.getElementById("ordersContainer");
 
-        fetch("http://localhost:2020/api/orders/all") // or your actual orders endpoint
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/orders/all"
+        ) // or your actual orders endpoint
           .then((res) => res.json())
           .then((orders) => {
             if (!orders.length) {

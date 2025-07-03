@@ -123,7 +123,9 @@
       updateAuthBtn();
 
       function loadProducts() {
-        fetch("http://localhost:2020/api/products/get-product")
+        fetch(
+          "https://simple-ecommerce-backend-6nvi.onrender.com//api/products/get-product"
+        )
           .then((res) => res.json())
           .then((products) => {
             productList.innerHTML = "";
@@ -137,7 +139,7 @@
               div.className = "product";
 
               const imageUrl = p.image
-                ? `http://localhost:2020/${p.image}`
+                ? `https://simple-ecommerce-backend-6nvi.onrender.com//${p.image}`
                 : "https://via.placeholder.com/200x150";
 
               div.innerHTML = `
